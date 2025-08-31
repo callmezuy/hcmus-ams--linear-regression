@@ -1,0 +1,77 @@
+\documentclass[a4paper, 12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+\usepackage[vietnamese]{babel}
+
+\usepackage[a4paper,margin=24mm]{geometry}
+\usepackage[skip=10pt plus1pt, indent=20pt]{parskip}
+\usepackage{indentfirst}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tocbasic}
+
+\usepackage{amsmath,amssymb}
+\usepackage{textcomp}
+\usepackage{gensymb}
+
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{subcaption}
+\usepackage{xcolor}
+
+\usepackage[colorlinks=true,allcolors=blue,urlcolor=magenta]{hyperref}
+
+\usepackage{minted}
+\usepackage{listings}
+\usepackage{verbatim}
+
+\usepackage{relsize}
+\usepackage{array}
+
+\usepackage[colorinlistoftodos]{todonotes}
+
+\usepackage{lipsum}
+\usepackage[normalem]{ulem}
+\usepackage{xparse}
+
+\NewDocumentCommand{\myrule}{O{1pt} O{2pt} O{black}}{%
+  \par\nobreak%
+  \kern\the\prevdepth%
+  \kern#2
+  {\color{#3}\hrule height #1 width\hsize} 
+  \kern#2
+  \nointerlineskip%
+}
+
+\usepackage[section]{placeins}
+
+\usepackage{booktabs}    
+\usepackage{colortbl}   
+\newcommand{\myrowcolour}{\rowcolor[gray]{0.925}} 
+
+\DeclareTOCStyleEntry[
+  indent=12pt,
+  level=1
+]{largetocline}{section}
+
+\setlength{\marginparwidth}{2cm}
+
+\begin{document}
+\input{pages/title_page.tex}
+\newpage
+
+\tableofcontents\thispagestyle{empty}
+\newpage
+
+\input{pages/idea.tex}
+\newpage
+\input{pages/implementation.tex}
+\newpage
+\input{pages/result.tex}
+\newpage
+\input{pages/acknowledgement.tex}
+\input{pages/reference.tex}
+
+\pagebreak
+\end{document}

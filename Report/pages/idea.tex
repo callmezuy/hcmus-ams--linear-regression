@@ -1,0 +1,111 @@
+\section{Ý tưởng thực hiện}
+
+\subsection{Tổng quan về đồ án}
+Đồ án 3 tập trung vào việc xây dựng mô hình \textbf{Linear Regression} để dự đoán chỉ số thành tích học tập của sinh viên (Academic Student Performance Index). Mục tiêu chính là tìm hiểu các yếu tố ảnh hưởng đến kết quả học tập và xây dựng các mô hình dự đoán hiệu quả.
+
+\subsection{Input và Output}
+\textbf{Input:}
+\begin{itemize}
+	\item \textbf{Tập huấn luyện:} p03.train.csv (9000 mẫu)
+	\item \textbf{Tập kiểm tra:} p03.test.csv (1000 mẫu)
+	\item \textbf{Đặc trưng đầu vào:} 5 thuộc tính
+	      \begin{itemize}
+		      \item Hours Studied: Số giờ học tập
+		      \item Previous Scores: Điểm số các bài kiểm tra trước
+		      \item Extracurricular Activities: Hoạt động ngoại khóa (0/1)
+		      \item Sleep Hours: Số giờ ngủ
+		      \item Sample Question Papers Practiced: Số bài kiểm tra mẫu đã luyện tập
+	      \end{itemize}
+\end{itemize}
+
+\textbf{Output:}
+\begin{itemize}
+	\item \textbf{Dự đoán Performance Index:} Chỉ số thành tích học tập được dự đoán cho từng sinh viên
+	\item \textbf{Các mô hình hồi quy tuyến tính} với độ chính xác khác nhau
+	\item \textbf{Đánh giá hiệu suất} bằng độ đo MSE (Mean Squared Error)
+	\item \textbf{Công thức toán học} cho mỗi mô hình với các hệ số được tính toán
+\end{itemize}
+
+\subsection{Mục tiêu}
+\begin{enumerate}
+	\item \textbf{Phân tích khám phá dữ liệu (EDA):} Hiểu rõ đặc điểm và mối quan hệ giữa các thuộc tính với thành tích học tập
+	\item \textbf{Xây dựng mô hình hồi quy tuyến tính:}
+	      \begin{itemize}
+		      \item Mô hình sử dụng toàn bộ 5 đặc trưng
+		      \item Mô hình sử dụng 1 đặc trưng tốt nhất
+		      \item Mô hình tùy chỉnh sinh viên tự xây dựng
+	      \end{itemize}
+	\item \textbf{So sánh và đánh giá:} Tìm ra mô hình có hiệu suất tốt nhất
+\end{enumerate}
+
+\subsection{Ý tưởng giải quyết}
+
+\subsubsection{Phương pháp tiếp cận}
+\textbf{1. Phân tích khám phá dữ liệu:}
+\begin{itemize}
+	\item Sử dụng thống kê mô tả để hiểu phân phối dữ liệu
+	\item Trực quan hóa bằng các biểu đồ: histogram, boxplot, scatter plot, correlation matrix
+	\item Phát hiện outliers và missing values
+	\item Phân tích mối tương quan giữa các đặc trưng
+\end{itemize}
+
+\textbf{2. Xây dựng mô hình Linear Regression:}
+\begin{itemize}
+	\item Cài đặt mô hình Linear Regression sử dụng Normal Equation: \(\beta = {(X^{T}X)}^{-1}X^{T}y\)
+	\item Áp dụng k-fold Cross Validation để đánh giá độ tin cậy
+	\item Sử dụng MSE làm độ đo đánh giá hiệu suất
+\end{itemize}
+
+\textbf{3. Kỹ thuật đặc trưng:}
+\begin{itemize}
+	\item Tạo các đặc trưng mới từ sự kết hợp của các đặc trưng gốc
+	\item Áp dụng đặc trưng đa thức
+	\item Chuẩn hóa dữ liệu (chuẩn hóa Z-score)
+	\item Tạo đặc trưng tương tác để nắm bắt mối quan hệ phức tạp
+\end{itemize}
+
+\subsubsection{Kiến trúc hệ thống}
+\begin{enumerate}
+	\item \textbf{Module xử lý dữ liệu:}
+	      \begin{itemize}
+		      \item Hàm đọc dữ liệu: Đọc và xử lý dữ liệu từ tập tin CSV
+		      \item Hàm trực quan hóa EDA: Tạo 6 biểu đồ phân tích khám phá dữ liệu
+		      \item Quản lý biểu đồ: Tự động tạo thư mục và lưu biểu đồ
+	      \end{itemize}
+
+	\item \textbf{Module cài đặt mô hình chính:}
+	      \begin{itemize}
+		      \item Lớp \texttt{LinearRegression}: Cài đặt mô hình hồi quy tuyến tính
+		      \item Hàm \texttt{calculate\_mse()}: Tính toán MSE với mảng numpy
+		      \item Hàm \texttt{k\_fold\_cross\_validation()}: Đánh giá chéo k-fold với hạt giống ngẫu nhiên
+		      \item Hàm \texttt{display\_model\_formula()}: Hiển thị công thức toán học của mô hình
+	      \end{itemize}
+
+	\item \textbf{Module kỹ thuật đặc trưng:}
+	      \begin{itemize}
+		      \item \textbf{Mô hình 1}: Sử dụng 2 đặc trưng tốt nhất
+		      \item \textbf{Mô hình 2}: Sử dụng 3 đặc trưng tốt nhất
+		      \item \textbf{Mô hình 3}: Đặc trưng bậc 2
+		      \item \textbf{Mô hình 4}: Đặc trưng chuẩn hóa Z-score
+		      \item \textbf{Mô hình 5}: Đặc trưng tương tác và kỹ thuật
+	      \end{itemize}
+
+	\item \textbf{Module đánh giá và báo cáo:}
+	      \begin{itemize}
+		      \item So sánh cross-validation
+		      \item Tính toán MSE trên tập kiểm tra
+		      \item Lựa chọn mô hình tốt nhất dựa trên điểm số cross-validation
+		      \item Hiển thị công thức với ký hiệu toán học
+		      \item Phân tích hiệu suất và nhận xét kết quả
+	      \end{itemize}
+\end{enumerate}
+
+\subsubsection{Chiến lược lựa chọn đặc trưng}
+Dựa trên phân tích EDA, đề xuất các chiến lược:
+\begin{itemize}
+	\item \textbf{Đặc trưng hàng đầu:} Kết hợp 2-3 đặc trưng có tương quan cao nhất
+	\item \textbf{Phương pháp đa thức:} Sử dụng Previous Scores và bình phương của nó
+	\item \textbf{Chuẩn hóa:} Chuẩn hóa để cân bằng tầm quan trọng các đặc trưng
+	\item \textbf{Đặc trưng tương tác:} Tạo đặc trưng mới phản ánh mối quan hệ phức tạp
+	\item \textbf{Đặc trưng kỹ thuật:} Tạo chỉ số tổng hợp như ``hiệu quả học tập'', ``chỉ số cân bằng''
+\end{itemize}

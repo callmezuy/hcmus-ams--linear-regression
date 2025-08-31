@@ -1,0 +1,235 @@
+\section{Chi tiết thực hiện}
+
+\subsection{Cấu trúc chương trình}
+
+\subsubsection{Thư viện sử dụng}
+Chương trình sử dụng các thư viện Python sau:
+\begin{itemize}
+	\item \textbf{pandas}: Xử lý và thao tác dữ liệu dạng DataFrame, đọc tập tin CSV
+	\item \textbf{numpy}: Tính toán số học, đại số tuyến tính và các phép toán ma trận
+	\item \textbf{matplotlib.pyplot}: Tạo biểu đồ và trực quan hóa dữ liệu
+	\item \textbf{seaborn}: Tạo biểu đồ thống kê chuyên sâu và ma trận tương quan
+	\item \textbf{os}: Quản lý thư mục, đường dẫn tập tin và hệ thống
+\end{itemize}
+
+\subsection{Module xử lý dữ liệu}
+
+\subsubsection{Đọc và xử lý dữ liệu}
+\begin{itemize}
+	\item Sử dụng \texttt{pd.read\_csv()} để đọc tập tin `p03.train.csv' (9000 mẫu) và `p03.test.csv' (1000 mẫu)
+	\item Lưu trữ dữ liệu gốc trong \texttt{train\_raw} và \texttt{test\_raw}
+	\item Sử dụng \texttt{drop\_duplicates(keep=`first')} để loại bỏ dữ liệu trùng lặp
+	\item Báo cáo chi tiết số lượng dòng ban đầu, số dòng trùng lặp và số dòng còn lại
+	\item Lưu dữ liệu đã được làm sạch vào \texttt{train} và \texttt{test}
+\end{itemize}
+
+\subsubsection{Phân tích khám phá dữ liệu (EDA)}
+Thực hiện phân tích toàn diện trên tập huấn luyện:
+
+\textbf{Thống kê mô tả}:
+\begin{itemize}
+	\item Sử dụng \texttt{train.info()} để kiểm tra kiểu dữ liệu và missing values
+	\item Sử dụng \texttt{train.describe()} để có thống kê tổng quan
+	\item Kiểm tra \texttt{train.isnull().sum()} để xác nhận không có giá trị thiếu
+\end{itemize}
+
+\textbf{Trực quan hóa dữ liệu} - Tạo 6 biểu đồ chính:
+\begin{itemize}
+	\item \textbf{Figure 1}: Distribution of Performance Index - Biểu đồ phân phối của biến mục tiêu
+	\item \textbf{Figure 2}: Boxplots for numerical features - Biểu đồ hộp cho các đặc trưng số
+	\item \textbf{Figure 3}: Distribution of Extracurricular Activities - Phân phối hoạt động ngoại khóa
+	\item \textbf{Figure 4}: Correlation Matrix - Ma trận tương quan giữa các đặc trưng
+	\item \textbf{Figure 5}: Scatter plots relationships - Biểu đồ phân tán mối quan hệ với Performance Index
+	\item \textbf{Figure 6}: Performance comparison by Extracurricular - So sánh hiệu suất theo hoạt động ngoại khóa
+\end{itemize}
+
+\subsection{Module cài đặt mô hình chính}
+
+\subsubsection{Lớp \texttt{LinearRegression}}
+\textbf{Mục đích}: Cài đặt hoàn chỉnh mô hình hồi quy tuyến tính sử dụng Normal Equation.
+
+\textbf{Thuộc tính}:
+\begin{itemize}
+	\item \texttt{coefficients}: Mảng các hệ số \(\beta_1, \beta_2, ..., \beta_n\)
+	\item \texttt{intercept}: Hệ số chặn \(\beta_0\)
+	\item \texttt{feature\_names}: Danh sách tên các đặc trưng
+\end{itemize}
+
+\textbf{Phương thức \texttt{fit(X, y)}}:
+\begin{enumerate}
+	\item Chuyển đổi dữ liệu đầu vào thành numpy arrays
+	\item Lưu trữ tên đặc trưng nếu X là DataFrame
+	\item Thêm cột bias (cột toàn số 1) cho intercept: \texttt{X\_with\_bias}
+	\item Áp dụng Normal Equation: \(\beta = {(X^{T}X)}^{-1}X^{T}y\)
+	      \begin{itemize}
+		      \item Tính \texttt{XtX = np.dot(X\_with\_bias.T, X\_with\_bias)}
+		      \item Tính \texttt{XtX\_inv = np.linalg.inv(XtX)}
+		      \item Tính \texttt{Xty = np.dot(X\_with\_bias.T, y)}
+		      \item Kết quả: \texttt{beta = np.dot(XtX\_inv, Xty)}
+	      \end{itemize}
+	\item Xử lý ngoại lệ ma trận suy biến bằng pseudo-inverse
+	\item Tách intercept và coefficients từ vector beta
+\end{enumerate}
+
+\textbf{Phương thức \texttt{predict(X)}}:
+\begin{itemize}
+	\item Áp dụng công thức: \(y = \beta_0 + \beta_1x_1 + \beta_2x_2 + \cdots + \beta_{n}x_{n}\)
+	\item Sử dụng \texttt{np.dot(X, self.coefficients)} để tính tích vô hướng
+	\item Trả về mảng dự đoán
+\end{itemize}
+
+\subsubsection{Hàm \texttt{calculate\_mse()}}
+\textbf{Mục đích}: Tính Mean Squared Error để đánh giá hiệu suất mô hình.
+
+\textbf{Công thức toán học}:
+\[MSE = \frac{1}{n}\sum_{i=1}^{n}{(y_i - \hat{y_i})}^2\]
+
+\textbf{Thực hiện}:
+\begin{itemize}
+	\item Chuyển đổi \texttt{y\_true} và \texttt{y\_pred} thành numpy arrays
+	\item Tính số lượng mẫu: \texttt{n = len(y\_true)}
+	\item Áp dụng công thức: \texttt{mse = np.sum((y\_true - y\_pred) ** 2) / n}
+\end{itemize}
+
+\subsubsection{Hàm \texttt{k\_fold\_cross\_validation()}}
+\textbf{Mục đích}: Thực hiện đánh giá chéo k-fold để đánh giá độ tin cậy mô hình.
+
+\textbf{Tham số}:
+\begin{itemize}
+	\item \texttt{X}: Ma trận đặc trưng
+	\item \texttt{y}: Vector mục tiêu
+	\item \texttt{k=5}: Số fold (mặc định 5) - Cân bằng giữa độ chính xác và chi phí tính toán
+	\item \texttt{random\_state=42}: Hạt giống ngẫu nhiên (giá trị phổ biến trong Machine Learning) để đảm bảo tái tạo kết quả
+\end{itemize}
+
+\textbf{Quy trình thực hiện}:
+\begin{enumerate}
+	\item Thiết lập hạt giống ngẫu nhiên: \texttt{np.random.seed(random\_state)}
+	\item Tạo và xáo trộn chỉ số mẫu: \texttt{np.random.shuffle(indices)}
+	\item Chia dữ liệu thành k folds với \texttt{fold\_size = n\_samples // k}
+	\item Với mỗi fold i:
+	      \begin{itemize}
+		      \item Xác định chỉ số test: từ \texttt{i * fold\_size} đến \texttt{(i+1) * fold\_size}
+		      \item Chỉ số train: tất cả mẫu còn lại
+		      \item Chia dữ liệu theo chỉ số
+		      \item Huấn luyện mô hình LinearRegression trên fold train
+		      \item Dự đoán trên fold test và tính MSE
+	      \end{itemize}
+	\item Trả về MSE trung bình: \texttt{np.mean(mse\_scores)}
+\end{enumerate}
+
+\subsubsection{Hàm \texttt{display\_model\_formula()}}
+\textbf{Mục đích}: Hiển thị công thức hồi quy dưới dạng toán học dễ đọc.
+
+\textbf{Thực hiện}:
+\begin{itemize}
+	\item Bắt đầu với intercept: \texttt{f"Student Performance = \{model.intercept:.3f\}"}
+	\item Duyệt qua từng đặc trưng và hệ số tương ứng
+	\item Xử lý dấu "+/-" tự động dựa trên giá trị hệ số
+	\item Định dạng: \texttt{f"\{sign\}\{coef:.3f\}×\{feature\}"}
+	\item In ra công thức hoàn chỉnh
+\end{itemize}
+
+\subsection{Module kỹ thuật đặc trưng}
+
+\subsubsection{Thiết kế 5 mô hình tùy chỉnh}
+
+\textbf{Mô hình 1: Top 2 đặc trưng}
+\begin{itemize}
+	\item \textbf{Hàm}: \texttt{create\_model1\_features(X)}
+	\item \textbf{Đặc trưng}: Hours Studied + Previous Scores
+	\item \textbf{Cơ sở}: Dựa trên phân tích tương quan cao nhất từ EDA
+	\item \textbf{Thực hiện}: \texttt{return X[[`Hours Studied', `Previous Scores']]}
+\end{itemize}
+
+\textbf{Mô hình 2: Top 3 đặc trưng}
+\begin{itemize}
+	\item \textbf{Hàm}: \texttt{create\_model2\_features(X)}
+	\item \textbf{Đặc trưng}: Hours Studied + Previous Scores + Extracurricular Activities
+	\item \textbf{Cơ sở}: Mở rộng từ Model 1 với thêm yếu tố hoạt động ngoại khóa
+	\item \textbf{Thực hiện}: \texttt{return X[[`Hours Studied', `Previous Scores', `Extracurricular Activities']]}
+\end{itemize}
+
+\textbf{Mô hình 3: Đặc trưng đa thức}
+\begin{itemize}
+	\item \textbf{Hàm}: \texttt{create\_model3\_features(X)}
+	\item \textbf{Đặc trưng}: Previous Scores + Previous Scores²
+	\item \textbf{Cơ sở}: Nắm bắt mối quan hệ phi tuyến
+	\item \textbf{Thực hiện}:
+	      \begin{itemize}
+		      \item \texttt{X\_new = X[[`Previous Scores']].copy()}
+		      \item \texttt{X\_new[`Previous\_Scores\_squared'] = X[`Previous Scores'] ** 2}
+	      \end{itemize}
+\end{itemize}
+
+\textbf{Mô hình 4: Chuẩn hóa Z-score}
+\begin{itemize}
+	\item \textbf{Hàm}: \texttt{create\_model4\_features(X)}
+	\item \textbf{Đặc trưng}: Hours Studied và Previous Scores được chuẩn hóa
+	\item \textbf{Công thức chuẩn hóa}: \(z = \frac{x - \mu}{\sigma}\)
+	\item \textbf{Thực hiện}:
+	      \begin{itemize}
+		      \item Tính mean và std cho mỗi đặc trưng
+		      \item \texttt{Hours\_Normalized = (Hours - mean) / std}
+		      \item \texttt{Previous\_Normalized = (Previous - mean) / std}
+	      \end{itemize}
+\end{itemize}
+
+\textbf{Mô hình 5: Đặc trưng tương tác và kỹ thuật}
+\begin{itemize}
+	\item \textbf{Đặc trưng kỹ thuật:}
+	\begin{itemize}
+		\item \textbf{Hours\_x\_Previous}: \texttt{X[`Hours Studied'] * X[`Previous Scores']}
+		\item \textbf{Study\_Efficiency}: \texttt{X[`Hours Studied'] * X[`Sample Question Papers Practiced']}
+		\item \textbf{Total\_Capability}: \texttt{X[`Previous Scores'] + X[`Extracurricular Activities'] * 10}
+		\item \textbf{Balance\_Index}: \texttt{X[`Previous Scores'] / (X[`Hours Studied'] + 1)}
+	\end{itemize}
+	\item \textbf{Ý nghĩa}:
+	\begin{itemize}
+		\item Tương tác giữa số giờ học và điểm số trước đó
+		\item Hiệu quả học tập qua việc luyện tập
+		\item Tổng năng lực với bonus từ hoạt động ngoại khóa (nhân 10 để tạo trọng số có ý nghĩa so với Previous Scores)
+		\item Chỉ số cân bằng đánh giá hiệu quả (tránh chia 0 bằng cách cộng thêm 1 vào Hours Studied)
+	\end{itemize}
+\end{itemize}
+
+\subsection{Module đánh giá và báo cáo}
+
+\subsubsection{Yêu cầu 2a: Mô hình 5 đặc trưng}
+\textbf{Quy trình thực hiện}:
+\begin{enumerate}
+	\item Khởi tạo mô hình: \texttt{model\_2a = LinearRegression()}
+	\item Huấn luyện: \texttt{model\_2a.fit(X\_train, y\_train)}
+	\item Dự đoán: \texttt{y\_pred\_2a = model\_2a.predict(X\_test)}
+	\item Đánh giá: \texttt{mse\_2a = calculate\_mse(y\_test, y\_pred\_2a)}
+	\item Hiển thị công thức: \texttt{display\_model\_formula(model\_2a, X\_train.columns)}
+\end{enumerate}
+
+\subsubsection{Yêu cầu 2b: Đặc trưng tốt nhất}
+\textbf{Quy trình so sánh}:
+\begin{enumerate}
+	\item Định nghĩa danh sách 5 đặc trưng
+	\item Với mỗi đặc trưng:
+	      \begin{itemize}
+		      \item Tạo \texttt{X\_single = X\_train[[feature]]}
+		      \item Thực hiện 5-fold cross validation
+		      \item Lưu kết quả MSE vào dictionary
+	      \end{itemize}
+	\item Tìm đặc trưng tốt nhất: \texttt{min(cv\_results, key=cv\_results.get)}
+	\item Huấn luyện lại mô hình với đặc trưng tốt nhất
+	\item Đánh giá trên tập test
+\end{enumerate}
+
+\subsubsection{Yêu cầu 2c: Mô hình tùy chỉnh}
+\textbf{Quy trình đánh giá}:
+\begin{enumerate}
+	\item Định nghĩa dictionary chứa 5 mô hình và hàm tạo đặc trưng
+	\item Với mỗi mô hình:
+	      \begin{itemize}
+		      \item Gọi hàm tạo đặc trưng: \texttt{X\_features = feature\_func(X\_train)}
+		      \item Thực hiện 5-fold cross validation
+	      \end{itemize}
+	\item Lựa chọn mô hình tốt nhất dựa trên MSE thấp nhất
+	\item Huấn luyện lại trên toàn bộ tập train
+	\item Đánh giá trên tập test
+\end{enumerate}
